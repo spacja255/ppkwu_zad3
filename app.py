@@ -7,30 +7,28 @@ import datetime
 
 app = Flask(__name__)
 
-def scrap_for(year, month):
+def scrap_events_from(year, month):
     url = "http://www.weeia.p.lodz.pl/pliki_strony_kontroler/kalendarz.php?rok={}&miesiac={}&lang=1".format(year, month)
     event_selector = "#kalendarz td.active"
-    title_selector = "#kalendarz .InnerBox"
-    day_and_url_selector = "#kalendarz a"
+    title_selector = "div.calendar-text"
+    day_and_url_selector = "a.active"
     
     response = urlopen(url)
     html = BeautifulSoup(response.read())
     selected_elements = html.select(event_selector)
-    data = []
+    calendar = Calendar()
     
     for e in selected_elements:
-        title = e.select(title_selector)[0].getText()
+        event = Event()
+        event.name = e.select(title_selector)[0].getText()
         day_and_url = e.select(day_and_url_selector)[0]
-        date = "{}-{}-{}".format(year, month, day_and_url.getText())
-        url = day_and_url["href"]
+        event.begin = "{}-{}-{:02d}".format(year, month, int(day_and_url.getText()))
+        event.url = day_and_url["href"]
+        event.make_all_day()
         
-        data.append({
-            "title": title,
-            "date": date,
-            "url": url
-        })
+        calendar.events.add(event)
         
-    return data
+    return calendar
 
 @app.route("/")
 def index():
@@ -39,10 +37,10 @@ def index():
 @app.route("/events")
 def actual_events():
     now = datetime.datetime.now()
-    return jsonify(scrap_for(now.year, now.month))
+    return str(scrap_events_from(now.year, now.month))
  
 @app.route("/events/<year>/<month>")
 def events(year, month):
-    return jsonify(scrap_for(year, month))
+    return str(scrap_events_from(year, month))
 
-app.run("lan", 8080)
+app.run("0.0.0.0", 8080)
