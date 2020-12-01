@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import jsonify
+from flask import Response
 from bs4 import BeautifulSoup
 from ics import Calendar, Event
 from urllib.request import urlopen
@@ -25,10 +25,9 @@ def scrap_events_from(year, month):
         event.begin = "{}-{}-{:02d}".format(year, month, int(day_and_url.getText()))
         event.url = day_and_url["href"]
         event.make_all_day()
-        
         calendar.events.add(event)
         
-    return calendar
+    return str(calendar)
 
 @app.route("/")
 def index():
@@ -37,10 +36,10 @@ def index():
 @app.route("/events")
 def actual_events():
     now = datetime.datetime.now()
-    return str(scrap_events_from(now.year, now.month))
+    return Response(scrap_events_from(now.year, now.month), mimetype="text/calendar")
  
 @app.route("/events/<year>/<month>")
 def events(year, month):
-    return str(scrap_events_from(year, month))
+    return Response(scrap_events_from(year, month), mimetype="text/calendar")
 
 app.run("0.0.0.0", 8080)
