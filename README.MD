@@ -2,7 +2,7 @@
 
 ## Details
 
-The API generates (for the current or selected month) a calendar in ICS/iCal format for data from `http://www.weeia.p.lodz.pl`
+The API generates (for the current or selected month) a calendar in ICS/iCal format for data from `http://www.weeia.p.lodz.pl` website
 
 ## Endpoints
 
@@ -29,7 +29,7 @@ iCalendar file containing events from selected month
 
 ### Request
 
-`GET /events/2020/03`
+`GET /events/2020/10`
 
 ### Response
 
